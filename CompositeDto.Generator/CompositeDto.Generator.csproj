@@ -1,0 +1,70 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+
+    <PropertyGroup>
+        <TargetFramework>netstandard2.0</TargetFramework>
+        <LangVersion>latest</LangVersion>
+        <!--<NoPackageAnalysis>true</NoPackageAnalysis>-->
+        <!-- Generates a package at build -->
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <!-- Do not include the generator as a lib dependency -->
+        <IncludeBuildOutput>false</IncludeBuildOutput>
+        <Nullable>enable</Nullable>
+
+        <IsRoslynComponent>true</IsRoslynComponent>
+        <AnalysisLevel>latest-all</AnalysisLevel>
+        <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
+    </PropertyGroup>
+
+
+    <ItemGroup>
+        <PackageReference Update="NETStandard.Library" PrivateAssets="all" GeneratePathProperty="true" />
+        <PackageReference Include="Microsoft.Bcl.HashCode" Version="1.1.1" />
+        <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.11.0" PrivateAssets="all" />
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.10.0" PrivateAssets="all" />
+        <PackageReference Include="PolySharp" Version="1.14.1">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+    </ItemGroup>
+
+	<PropertyGroup Condition="$(Configuration) == 'Release'">
+		<PackageVersion>0.0.2</PackageVersion>
+		<Version>0.0.2</Version>
+
+		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+		<Title>CompositeDto.Generator</Title>
+		<Copyright>Jonas Kamsker</Copyright>
+		<PackageProjectUrl>https://github.com/JKamsker/CompositeDto.Generator</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/JKamsker/CompositeDto.Generator</RepositoryUrl>
+
+
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<IncludeBuildOutput>false</IncludeBuildOutput>
+
+		<PackageId>CompositeDto.Generator</PackageId>
+		<Authors>Jonas Kamsker</Authors>
+		<Description>Auto implements interface properties.</Description>
+		<!--<PackageIcon>logo_small_128x128.png</PackageIcon>
+		<PackageReadmeFile>README.md</PackageReadmeFile>-->
+		<PackageTags>Autoimplement, Interfaces, c#, SourceGen</PackageTags>
+	</PropertyGroup>
+
+    <ItemGroup Condition="$(Configuration) == 'Release'">
+        <!-- Package the generator in the analyzer directory of the nuget package -->
+        <None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
+    </ItemGroup>
+	
+	
+	<!--Dependency on the runtime so it will be packagized with the sg and automatically referenced -->
+    <ItemGroup>
+      <ProjectReference Include="..\CompositeDto.Generator.Runtime\CompositeDto.Generator.Runtime.csproj" ReferenceOutputAssembly="false" />
+
+		<None Include="../CompositeDto.Generator.Runtime/bin/$(Configuration)/netstandard2.0/CompositeDto.Generator.Runtime.dll" Pack="true" PackagePath="lib/netstandard2.0" Visible="true" />
+
+		<!--<None Include="../Immediate.Handlers.Shared/bin/$(Configuration)/net8.0/Immediate.Handlers.Shared.dll" Pack="true" PackagePath="lib/net8.0" Visible="true" />
+		<None Include="../Immediate.Handlers.Shared/bin/$(Configuration)/net8.0/Immediate.Handlers.Shared.xml" Pack="true" PackagePath="lib/net8.0" Visible="true" />-->
+		
+		<!-- "..\CompositeDto.Generator.Runtime\bin\$(Configuration)\netstandard2.0\CompositeDto.Generator.Runtime.dll" -->
+    </ItemGroup>
+</Project>
