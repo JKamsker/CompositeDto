@@ -29,14 +29,14 @@
     </ItemGroup>
 
 	<PropertyGroup Condition="$(Configuration) == 'Release'">
-		<PackageVersion>0.0.2</PackageVersion>
-		<Version>0.0.2</Version>
+		<PackageVersion>0.0.3</PackageVersion>
+		<Version>0.0.3</Version>
 
 		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 		<Title>CompositeDto.Generator</Title>
 		<Copyright>Jonas Kamsker</Copyright>
-		<PackageProjectUrl>https://github.com/JKamsker/CompositeDto.Generator</PackageProjectUrl>
-		<RepositoryUrl>https://github.com/JKamsker/CompositeDto.Generator</RepositoryUrl>
+		<PackageProjectUrl>https://github.com/JKamsker/CompositeDto</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/JKamsker/CompositeDto</RepositoryUrl>
 
 
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
