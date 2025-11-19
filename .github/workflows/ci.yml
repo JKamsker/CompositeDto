@@ -37,3 +37,16 @@ jobs:
           name: composite-dto-sourcegen
           path: artifacts/*.nupkg
           if-no-files-found: error
+
+      - name: Retrieve secrets from Bitwarden
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+        uses: bitwarden/sm-action@v2
+        with:
+          access_token: ${{ secrets.BW_ACCESS_TOKEN }}
+          base_url: https://vault.bitwarden.eu
+          secrets: |
+            YOUR_BITWARDEN_SECRET_ID > NUGET_API_KEY
+
+      - name: Push package to NuGet
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+        run: dotnet nuget push "artifacts/*.nupkg" --api-key "$NUGET_API_KEY" --source https://api.nuget.org/v3/index.json --skip-duplicate
