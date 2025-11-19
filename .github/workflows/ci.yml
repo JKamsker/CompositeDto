@@ -22,14 +22,46 @@ jobs:
       - name: Restore
         run: dotnet restore CompositeDto.Generator.sln
 
+      - name: Determine package version
+        id: package_version
+        shell: pwsh
+        run: |
+          $csprojPath = "CompositeDto.Generator/CompositeDto.Generator.csproj"
+          $match = Select-String -Path $csprojPath -Pattern '<PackageVersion>(?<version>[^<]+)</PackageVersion>' | Select-Object -First 1
+          if (-not $match) {
+            Write-Error "Could not find <PackageVersion> in $csprojPath"
+            exit 1
+          }
+          $baseVersionText = $match.Matches[0].Groups['version'].Value.Trim()
+          try {
+            $baseVersion = [version]$baseVersionText
+          }
+          catch {
+            Write-Error "PackageVersion '$baseVersionText' is not a valid version."
+            exit 1
+          }
+          $patch = if ($baseVersion.Build -ge 0) { $baseVersion.Build } else { 0 }
+          if (-not $env:GITHUB_RUN_NUMBER) {
+            Write-Warning "GITHUB_RUN_NUMBER is not set; defaulting the increment to 1."
+            $runNumber = 1
+          }
+          else {
+            $runNumber = [int]$env:GITHUB_RUN_NUMBER
+          }
+          $newPatch = $patch + $runNumber
+          $newVersion = "{0}.{1}.{2}" -f $baseVersion.Major, $baseVersion.Minor, $newPatch
+          Write-Host "Calculated package version: $newVersion"
+          Add-Content -Path $env:GITHUB_OUTPUT -Value "package_version=$newVersion"
+          Add-Content -Path $env:GITHUB_ENV -Value "PACKAGE_VERSION=$newVersion"
+
       - name: Build
-        run: dotnet build CompositeDto.Generator.sln --configuration Release --no-restore
+        run: dotnet build CompositeDto.Generator.sln --configuration Release --no-restore -p:Version=${{ env.PACKAGE_VERSION }} -p:PackageVersion=${{ env.PACKAGE_VERSION }}
 
       - name: Test
         run: dotnet test CompositeDto.Generator.sln --configuration Release --no-build --logger trx
 
       - name: Pack source generator
-        run: dotnet pack CompositeDto.Generator/CompositeDto.Generator.csproj --configuration Release --no-build --output artifacts
+        run: dotnet pack CompositeDto.Generator/CompositeDto.Generator.csproj --configuration Release --no-build -p:Version=${{ env.PACKAGE_VERSION }} -p:PackageVersion=${{ env.PACKAGE_VERSION }} --output artifacts
 
       - name: Upload source generator artifact
         uses: actions/upload-artifact@v4
