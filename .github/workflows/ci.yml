@@ -45,7 +45,7 @@ jobs:
           access_token: ${{ secrets.BW_ACCESS_TOKEN }}
           base_url: https://vault.bitwarden.eu
           secrets: |
-            YOUR_BITWARDEN_SECRET_ID > NUGET_API_KEY
+            265b2fb6-2cf0-4859-9bc8-b24c00ab4378 > NUGET_API_KEY
 
       - name: Push package to NuGet
         if: github.event_name == 'push' && github.ref == 'refs/heads/master'
