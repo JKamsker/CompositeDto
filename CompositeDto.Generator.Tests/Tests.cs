@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 
 using Xunit;
 
@@ -208,5 +209,59 @@ public class Tests
         var generated = gensource[0].ToString();
         Assert.Contains("<summary>", generated);
         Assert.Contains("The first property", generated);
+    }
+
+    [Fact]
+    public void Record_Class_Generates_Partial_Record()
+    {
+        var source =
+            """
+            namespace CompositeDto.Generator.Tests;
+
+            public interface IInterface1
+            {
+                string Property1 { get; set; }
+            }
+
+            [CompositeDto]
+            public partial record MyDto : IInterface1;
+            """;
+
+        var res = GeneratorTestHelper.RunGenerator(source);
+
+        var generated = res.Results
+            .SelectMany(x => x.GeneratedSources)
+            .Select(x => x.SourceText.ToString())
+            .Single();
+
+        Assert.Contains("partial record MyDto", generated);
+        Assert.Contains("public global::System.String Property1 { get; set; }", generated);
+    }
+
+    [Fact]
+    public void Record_Struct_Generates_Partial_Record_Struct()
+    {
+        var source =
+            """
+            namespace CompositeDto.Generator.Tests;
+
+            public interface IInterface1
+            {
+                string Property1 { get; set; }
+            }
+
+            [CompositeDto]
+            public partial record struct MyDto : IInterface1;
+            """;
+
+        var res = GeneratorTestHelper.RunGenerator(source);
+
+        var generated = res.Results
+            .SelectMany(x => x.GeneratedSources)
+            .Select(x => x.SourceText.ToString())
+            .Single();
+
+        Assert.Contains("partial record struct MyDto", generated);
+        Assert.Contains("public global::System.String Property1 { get; set; }", generated);
     }
 }

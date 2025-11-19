@@ -2,7 +2,7 @@
 
 namespace CompositeDto.Generator.Runtime;
 
-[AttributeUsage(AttributeTargets.Class)]
+[AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct)]
 public class CompositeDtoAttribute : Attribute
 {
 }

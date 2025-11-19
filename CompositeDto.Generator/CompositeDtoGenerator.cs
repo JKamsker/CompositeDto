@@ -7,6 +7,7 @@ using System.Threading;
 using CompositeDto.Generator.Helpers;
 
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 
@@ -23,7 +24,8 @@ public class CompositeDtoGenerator : IIncrementalGenerator
         var provider = context.SyntaxProvider
             .ForAttributeWithMetadataName(
                 "CompositeDto.Generator.Runtime.CompositeDtoAttribute",
-                (syntaxNode, ct) => syntaxNode is ClassDeclarationSyntax,
+                static (syntaxNode, ct) => syntaxNode is TypeDeclarationSyntax typeDeclarationSyntax &&
+                    IsSupportedTypeDeclaration(typeDeclarationSyntax),
                 (syntaxContext, ct) => new Transformer(syntaxContext, ct).Transform()
             );
 
@@ -59,13 +61,13 @@ public class CompositeDtoGenerator : IIncrementalGenerator
             {
                 foreach (var outerClass in target.OuterClasses)
                 {
-                    writer.WriteLine($"partial class {outerClass.Name}");
+                    writer.WriteLine($"partial {outerClass.Type} {outerClass.Name}");
                     writer.AppendOpenBracket();
                 }
             }
 
             // Because the interfaces are already stated on the main part of the class, we dont need to add them here
-            writer.WriteLine($"partial class {@class.Name}");
+            writer.WriteLine($"partial {@class.Type} {@class.Name}");
             writer.AppendOpenBracket();
 
 
@@ -136,5 +138,13 @@ public class CompositeDtoGenerator : IIncrementalGenerator
                 .ToLookup(x => (x.Name, x.Type))
             );
         }
+    }
+
+    private static bool IsSupportedTypeDeclaration(TypeDeclarationSyntax syntax)
+    {
+        return syntax.Kind() is SyntaxKind.ClassDeclaration
+            or SyntaxKind.StructDeclaration
+            or SyntaxKind.RecordDeclaration
+            or SyntaxKind.RecordStructDeclaration;
     }
 }
